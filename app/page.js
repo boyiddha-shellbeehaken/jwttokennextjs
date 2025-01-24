@@ -1,95 +1,86 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 import styles from "./page.module.css";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = { username, password };
+    // const payload = {
+    //   username: e.currentTarget.username.value,
+    //   password: e.currentTarget.password.value,
+    // };
+    await axios.post("/api/auth/login", payload);
+
+    // redirect the user to /dashboard
+    router.push("/dashboard");
+  };
+
+  const handleGetToken = async () => {
+    try {
+      const response = await axios.get("/api/getToken");
+      console.log(response.data);
+    } catch (error) {
+      // Use custom logging logic to suppress unnecessary UI alerts
+      if (process.env.NODE_ENV !== "development") {
+        console.error("Error logging out:", error);
+      }
+    }
+
+    // Use custom logging logic to suppress unnecessary UI alerts
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get("/api/auth/logout"); // Make GET request to the logout route
+      //console.log(response.data.message); // Log the success message from the server
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div>
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            className="border rounded border-black"
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div>
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            className="border rounded border-black"
+            onChange={(e) => setPassword(e.target.value)}
           />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+
+        <button
+          type="submit"
+          className="p-2 bg-orange-600 text-white w-fit rounded"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          LogIn
+        </button>
+      </form>
+      <button onClick={() => handleGetToken()}>GetToken</button>
+      <button onClick={() => handleLogout()}>Log Out</button>
     </div>
   );
 }
